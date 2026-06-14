@@ -14,6 +14,7 @@ export const SYMBOLS: Record<SymbolKey, SymbolConfig> = {
 export const BINANCE_FUTURES = 'https://fapi.binance.com';
 export const BINANCE_SPOT = 'https://api.binance.com';
 export const DEFILLAMA = 'https://api.llama.fi';
+export const DEFILLAMA_STABLECOINS = 'https://stablecoins.llama.fi';
 export const COINGECKO = 'https://api.coingecko.com/api/v3';
 export const MEMPOOL = 'https://mempool.space/api';
 export const ETHERSCAN = 'https://api.etherscan.io/api';
