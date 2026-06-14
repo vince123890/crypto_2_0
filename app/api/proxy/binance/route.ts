@@ -3,6 +3,7 @@ export const runtime = 'edge';
 const UPSTREAMS: Record<string, string> = {
   futures: 'https://fapi.binance.com',
   spot: 'https://api.binance.com',
+  'defillama-stablecoins': 'https://stablecoins.llama.fi',
 };
 
 // Proxy stateless ke Binance Public API. Diperlukan karena beberapa ISP

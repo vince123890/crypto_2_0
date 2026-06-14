@@ -1,4 +1,4 @@
-import { COINGECKO, DEFILLAMA_STABLECOINS } from '../constants';
+import { COINGECKO, defillamaStablecoinsUrl } from '../constants';
 import { errorResult, SignalResult } from './types';
 
 // A. Stablecoin supply weekly change — max weight 25
@@ -6,7 +6,7 @@ export async function getStablecoinSignal(): Promise<SignalResult> {
   try {
     // id=1 -> USDT di DeFiLlama stablecoins API
     const series: { date: string; totalCirculating: { peggedUSD: number } }[] = await fetch(
-      `${DEFILLAMA_STABLECOINS}/stablecoincharts/all?stablecoin=1`
+      defillamaStablecoinsUrl('/stablecoincharts/all', { stablecoin: '1' })
     ).then((r) => r.json());
 
     if (!Array.isArray(series) || series.length < 8) {

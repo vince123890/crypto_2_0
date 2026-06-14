@@ -24,8 +24,13 @@ export function binanceSpotUrl(path: string, params: Record<string, string> = {}
   return `/api/proxy/binance?${qs.toString()}`;
 }
 
-export const DEFILLAMA = 'https://api.llama.fi';
-export const DEFILLAMA_STABLECOINS = 'https://stablecoins.llama.fi';
+// stablecoins.llama.fi mengirim header CORS ganda (Access-Control-Allow-Origin: *, *)
+// yang ditolak browser. Proxy via Vercel edge function untuk menghindari masalah ini.
+export function defillamaStablecoinsUrl(path: string, params: Record<string, string> = {}): string {
+  const qs = new URLSearchParams({ host: 'defillama-stablecoins', path, ...params });
+  return `/api/proxy/binance?${qs.toString()}`;
+}
+
 export const COINGECKO = 'https://api.coingecko.com/api/v3';
 export const MEMPOOL = 'https://mempool.space/api';
 export const ETHERSCAN = 'https://api.etherscan.io/api';
