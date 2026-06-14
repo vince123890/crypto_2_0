@@ -8,17 +8,17 @@ interface SignalBreakdownCardProps {
 }
 
 export function SignalBreakdownCard({ title, weight, category }: SignalBreakdownCardProps) {
-  const scoreColor = category.score > 0 ? 'text-emerald-400' : category.score < 0 ? 'text-red-400' : 'text-slate-400';
+  const scoreColor = category.score > 0 ? 'text-emerald-400' : category.score < 0 ? 'text-red-400' : 'text-neutral-400';
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-      <div className="mb-2 flex items-baseline justify-between">
-        <h3 className="font-semibold text-slate-200">
-          {title} <span className="text-xs text-slate-500">({weight})</span>
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+      <div className="mb-2 flex items-baseline justify-between border-b border-white/10 pb-2">
+        <h3 className="text-sm font-medium uppercase tracking-wider text-neutral-300">
+          {title} <span className="text-xs text-neutral-500">({weight})</span>
         </h3>
-        <span className={`font-mono text-lg font-bold ${scoreColor}`}>{category.score.toFixed(1)}</span>
+        <span className={`tabular-nums font-serif text-2xl ${scoreColor}`}>{category.score.toFixed(1)}</span>
       </div>
-      <div className="divide-y divide-slate-800/60">
+      <div className="divide-y divide-white/5">
         {category.signals.map((s) => (
           <SignalRow key={s.signal} signal={s} />
         ))}

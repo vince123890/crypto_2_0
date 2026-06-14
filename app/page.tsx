@@ -16,38 +16,46 @@ export default function Home() {
   const { data, isLoading, isError, refresh, isFetching } = useClss(symbol, config);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 p-4 sm:p-8">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-4 sm:p-8">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <h1 className="text-2xl font-bold">🐋 Bandarmologi L/S Dashboard</h1>
-          <p className="text-sm text-slate-500">Composite Long/Short Score — stack API gratis</p>
+          <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neutral-500">
+            <span className={`h-2 w-2 rounded-full bg-emerald-400 ${isFetching ? 'pulse-dot' : ''}`} />
+            {isFetching ? 'Syncing' : 'Live'}
+          </div>
+          <h1 className="font-serif text-3xl italic tracking-tight sm:text-4xl">Bandarmologi Intelligence</h1>
+          <p className="mt-1 text-sm text-neutral-500">Composite Long/Short Score — stack API gratis</p>
         </div>
         <div className="flex items-center gap-3">
           <SymbolToggle value={symbol} onChange={setSymbol} />
           <button
             onClick={() => refresh()}
             disabled={isFetching}
-            className="rounded-lg border border-slate-700 px-4 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-md border border-white/15 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-neutral-300 transition hover:border-white/30 hover:bg-white/5 disabled:opacity-50"
           >
-            {isFetching ? 'Memuat...' : '🔄 Refresh'}
+            {isFetching ? (
+              <span className="spin inline-block">↻</span>
+            ) : (
+              '↻ Refresh'
+            )}
           </button>
         </div>
       </header>
 
       {isLoading && (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-8 text-center text-slate-400">
+        <div className="shimmer rounded-xl border border-white/10 bg-white/[0.02] p-8 text-center text-sm text-neutral-400">
           Memuat sinyal {symbol}...
         </div>
       )}
 
       {isError && (
-        <div className="rounded-xl border border-red-900 bg-red-950/40 p-4 text-sm text-red-300">
+        <div className="rounded-xl border border-red-900/60 bg-red-950/30 p-4 text-sm text-red-300">
           Gagal memuat data. Periksa koneksi atau coba refresh manual.
         </div>
       )}
 
       {data && (
-        <>
+        <div className="slide-down flex flex-col gap-6">
           <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
             <ClssGauge
               clss={data.result.CLSS}
@@ -56,14 +64,14 @@ export default function Home() {
               confidence={data.result.confidence}
             />
             <div className="flex flex-col gap-3">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-                <p className="text-sm text-slate-500">
-                  {config.label} ({config.binanceSymbol})
+              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+                  {config.label} · {config.binanceSymbol}
                 </p>
-                <p className="text-2xl font-bold">
+                <p className="tabular-nums mt-1 font-serif text-4xl">
                   ${data.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-2 text-xs text-neutral-500">
                   Update terakhir: {new Date(data.result.timestamp).toLocaleTimeString('id-ID')}
                 </p>
               </div>
@@ -81,7 +89,7 @@ export default function Home() {
           </div>
 
           <HistoryChart symbol={symbol} />
-        </>
+        </div>
       )}
 
       <Disclaimer />
