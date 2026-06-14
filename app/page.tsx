@@ -7,6 +7,7 @@ import { Disclaimer } from '../components/Disclaimer';
 import { HistoryChart } from '../components/HistoryChart';
 import { SignalBreakdownCard } from '../components/SignalBreakdownCard';
 import { SymbolToggle } from '../components/SymbolToggle';
+import { TradePlanCard } from '../components/TradePlanCard';
 import { useClss } from '../hooks/useClss';
 import { SYMBOLS, SymbolKey } from '../lib/constants';
 
@@ -87,6 +88,12 @@ export default function Home() {
             <SignalBreakdownCard title="Derivatif" weight="35%" category={data.result.categories.derivatives} />
             <SignalBreakdownCard title="Likuiditas" weight="25%" category={data.result.categories.liquidity} />
           </div>
+
+          <TradePlanCard
+            plan={data.tradePlan}
+            confidence={data.result.confidence}
+            consensusWarning={data.result.consensusWarning}
+          />
 
           <HistoryChart symbol={symbol} />
         </div>

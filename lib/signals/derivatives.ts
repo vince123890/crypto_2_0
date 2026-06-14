@@ -39,6 +39,51 @@ export async function getOpenInterestSignal(symbol: string): Promise<SignalResul
   }
 }
 
+// A2. OI Extreme / Whale Exhaustion (contrarian) — max weight 20
+// OI yang berada di persentil tinggi 7 hari sering menandakan posisi
+// "jenuh" (overcrowded) — rawan short/long squeeze & reversal.
+export async function getOIExtremeSignal(symbol: string): Promise<SignalResult> {
+  try {
+    const history: { sumOpenInterest: string }[] = await fetch(
+      binanceFuturesUrl('/futures/data/openInterestHist', { symbol, period: '4h', limit: '42' })
+    ).then((r) => r.json());
+
+    if (!Array.isArray(history) || history.length < 10) {
+      return errorResult('oi_extreme', 'Whale Exhaustion (OI 7d)', 20);
+    }
+
+    const values = history.map((h) => parseFloat(h.sumOpenInterest)).filter((v) => Number.isFinite(v));
+    const currentOI = values[values.length - 1];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (max === min) {
+      return errorResult('oi_extreme', 'Whale Exhaustion (OI 7d)', 20);
+    }
+
+    const percentile = ((currentOI - min) / (max - min)) * 100;
+
+    // Kontrarian: OI di puncak 7 hari -> posisi jenuh, rawan reversal turun.
+    // OI di dasar 7 hari -> kapitulasi, rawan reversal naik.
+    let score = 0;
+    if (percentile > 90) score = -20;
+    else if (percentile > 75) score = -10;
+    else if (percentile < 10) score = 20;
+    else if (percentile < 25) score = 10;
+
+    return {
+      signal: 'oi_extreme',
+      label: 'Whale Exhaustion (OI 7d)',
+      rawValue: `${percentile.toFixed(0)}th pct`,
+      score,
+      weight: 20,
+      status: 'ok',
+      fetchedAt: Date.now(),
+    };
+  } catch {
+    return errorResult('oi_extreme', 'Whale Exhaustion (OI 7d)', 20);
+  }
+}
+
 // B. Funding Rate (contrarian) — max weight 30
 export async function getFundingRateSignal(symbol: string): Promise<SignalResult> {
   try {
@@ -155,6 +200,7 @@ export async function getOrderBookImbalance(symbol: string): Promise<SignalResul
 export async function getDerivativeSignals(symbol: string): Promise<SignalResult[]> {
   return Promise.all([
     getOpenInterestSignal(symbol),
+    getOIExtremeSignal(symbol),
     getFundingRateSignal(symbol),
     getTopTraderRatioSignal(symbol),
     getOrderBookImbalance(symbol),

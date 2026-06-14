@@ -8,11 +8,14 @@ import { getDerivativeSignals } from '../lib/signals/derivatives';
 import { getLiquiditySignals } from '../lib/signals/liquidity';
 import { getOnchainSignals } from '../lib/signals/onchain';
 import { getCurrentPrice } from '../lib/signals/price';
+import { getPriceStructure } from '../lib/signals/priceStructure';
+import { buildTradePlan, TradePlan } from '../lib/signals/tradePlan';
 import { appendSnapshot } from '../lib/storage/history';
 
 export interface ClssData {
   result: CLSSResult;
   price: number;
+  tradePlan: TradePlan | null;
 }
 
 export function useClss(symbolKey: 'BTC' | 'ETH', config: SymbolConfig) {
@@ -21,15 +24,17 @@ export function useClss(symbolKey: 'BTC' | 'ETH', config: SymbolConfig) {
   const query = useQuery<ClssData>({
     queryKey: ['clss', symbolKey],
     queryFn: async () => {
-      const [onchain, derivatives, liquidity, price] = await Promise.all([
+      const [onchain, derivatives, liquidity, price, structure] = await Promise.all([
         getOnchainSignals(symbolKey),
         getDerivativeSignals(config.binanceSymbol),
         getLiquiditySignals(config.coingeckoId),
         getCurrentPrice(config.binanceSymbol),
+        getPriceStructure(config.binanceSymbol),
       ]);
 
       const result = calculateCLSS(symbolKey, onchain, derivatives, liquidity);
-      return { result, price };
+      const tradePlan = structure ? buildTradePlan(result.bias, price, structure) : null;
+      return { result, price, tradePlan };
     },
     refetchInterval: REFRESH_INTERVALS.microstructure,
     staleTime: REFRESH_INTERVALS.microstructure,
