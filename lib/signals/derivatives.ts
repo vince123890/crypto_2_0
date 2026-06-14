@@ -1,12 +1,12 @@
-import { BINANCE_FUTURES, BINANCE_SPOT } from '../constants';
+import { binanceFuturesUrl, binanceSpotUrl } from '../constants';
 import { errorResult, SignalResult } from './types';
 
 // A. Open Interest (OI) — max weight 30
 export async function getOpenInterestSignal(symbol: string): Promise<SignalResult> {
   try {
     const [oiNow, oiHistory] = await Promise.all([
-      fetch(`${BINANCE_FUTURES}/fapi/v1/openInterest?symbol=${symbol}`).then((r) => r.json()),
-      fetch(`${BINANCE_FUTURES}/futures/data/openInterestHist?symbol=${symbol}&period=1h&limit=25`).then((r) =>
+      fetch(binanceFuturesUrl('/fapi/v1/openInterest', { symbol })).then((r) => r.json()),
+      fetch(binanceFuturesUrl('/futures/data/openInterestHist', { symbol, period: '1h', limit: '25' })).then((r) =>
         r.json()
       ),
     ]);
@@ -42,7 +42,7 @@ export async function getOpenInterestSignal(symbol: string): Promise<SignalResul
 // B. Funding Rate (contrarian) — max weight 30
 export async function getFundingRateSignal(symbol: string): Promise<SignalResult> {
   try {
-    const data = await fetch(`${BINANCE_FUTURES}/fapi/v1/fundingRate?symbol=${symbol}&limit=3`).then((r) =>
+    const data = await fetch(binanceFuturesUrl('/fapi/v1/fundingRate', { symbol, limit: '3' })).then((r) =>
       r.json()
     );
 
@@ -76,7 +76,7 @@ export async function getFundingRateSignal(symbol: string): Promise<SignalResult
 export async function getTopTraderRatioSignal(symbol: string): Promise<SignalResult> {
   try {
     const data = await fetch(
-      `${BINANCE_FUTURES}/futures/data/topLongShortPositionRatio?symbol=${symbol}&period=1h&limit=1`
+      binanceFuturesUrl('/futures/data/topLongShortPositionRatio', { symbol, period: '1h', limit: '1' })
     ).then((r) => r.json());
 
     const ratio = parseFloat(data?.[0]?.longShortRatio);
@@ -107,7 +107,7 @@ export async function getTopTraderRatioSignal(symbol: string): Promise<SignalRes
 // D. Order Book Imbalance (2% range) — max weight 15
 export async function getOrderBookImbalance(symbol: string): Promise<SignalResult> {
   try {
-    const book = await fetch(`${BINANCE_SPOT}/api/v3/depth?symbol=${symbol}&limit=500`).then((r) => r.json());
+    const book = await fetch(binanceSpotUrl('/api/v3/depth', { symbol, limit: '500' })).then((r) => r.json());
 
     const bids: [string, string][] = book.bids ?? [];
     const asks: [string, string][] = book.asks ?? [];

@@ -11,8 +11,19 @@ export const SYMBOLS: Record<SymbolKey, SymbolConfig> = {
   ETH: { label: 'Ethereum', binanceSymbol: 'ETHUSDT', coingeckoId: 'ethereum' },
 };
 
-export const BINANCE_FUTURES = 'https://fapi.binance.com';
-export const BINANCE_SPOT = 'https://api.binance.com';
+// Beberapa ISP (mis. Telkomsel) melakukan DNS hijack/cert mismatch ke domain
+// binance.com sehingga fetch langsung dari browser gagal. Gunakan proxy
+// edge function Vercel sebagai default agar tetap berfungsi di jaringan tersebut.
+export function binanceFuturesUrl(path: string, params: Record<string, string> = {}): string {
+  const qs = new URLSearchParams({ host: 'futures', path, ...params });
+  return `/api/proxy/binance?${qs.toString()}`;
+}
+
+export function binanceSpotUrl(path: string, params: Record<string, string> = {}): string {
+  const qs = new URLSearchParams({ host: 'spot', path, ...params });
+  return `/api/proxy/binance?${qs.toString()}`;
+}
+
 export const DEFILLAMA = 'https://api.llama.fi';
 export const DEFILLAMA_STABLECOINS = 'https://stablecoins.llama.fi';
 export const COINGECKO = 'https://api.coingecko.com/api/v3';
