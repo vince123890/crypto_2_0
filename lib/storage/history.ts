@@ -9,11 +9,22 @@ export interface CLSSSnapshot {
 const HISTORY_KEY = 'bandarmologi_clss_history';
 const MAX_ENTRIES = 500; // ~84 hari @ 6x/hari
 
+// Cache hasil parse per symbol agar useSyncExternalStore tidak melihat
+// referensi array baru di setiap render (yang akan memicu infinite loop).
+const historyCache = new Map<string, { raw: string | null; data: CLSSSnapshot[] }>();
+
 export function getHistory(symbol: string): CLSSSnapshot[] {
   if (typeof window === 'undefined') return [];
   const raw = window.localStorage.getItem(`${HISTORY_KEY}_${symbol}`);
-  return raw ? (JSON.parse(raw) as CLSSSnapshot[]) : [];
+  const cached = historyCache.get(symbol);
+  if (cached && cached.raw === raw) return cached.data;
+
+  const data = raw ? (JSON.parse(raw) as CLSSSnapshot[]) : [];
+  historyCache.set(symbol, { raw, data });
+  return data;
 }
+
+export const HISTORY_UPDATED_EVENT = 'bandarmologi-history-updated';
 
 export function appendSnapshot(snapshot: CLSSSnapshot): void {
   if (typeof window === 'undefined') return;
@@ -25,9 +36,10 @@ export function appendSnapshot(snapshot: CLSSSnapshot): void {
     return;
   }
 
-  history.push(snapshot);
-  if (history.length > MAX_ENTRIES) history.shift();
-  window.localStorage.setItem(`${HISTORY_KEY}_${snapshot.symbol}`, JSON.stringify(history));
+  const updated = [...history, snapshot];
+  if (updated.length > MAX_ENTRIES) updated.shift();
+  window.localStorage.setItem(`${HISTORY_KEY}_${snapshot.symbol}`, JSON.stringify(updated));
+  window.dispatchEvent(new Event(HISTORY_UPDATED_EVENT));
 }
 
 export function exportHistoryAsCSV(symbol: string): string {

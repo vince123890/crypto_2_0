@@ -2,11 +2,15 @@
 
 import { useSyncExternalStore } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { downloadHistoryCSV, getHistory } from '../lib/storage/history';
+import { downloadHistoryCSV, getHistory, HISTORY_UPDATED_EVENT } from '../lib/storage/history';
 
 function subscribe(callback: () => void) {
   window.addEventListener('storage', callback);
-  return () => window.removeEventListener('storage', callback);
+  window.addEventListener(HISTORY_UPDATED_EVENT, callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener(HISTORY_UPDATED_EVENT, callback);
+  };
 }
 
 export function HistoryChart({ symbol }: { symbol: string }) {
